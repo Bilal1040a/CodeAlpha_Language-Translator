@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Language Translation Tool — CodeAlpha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <div class="stripe-bar" aria-hidden="true"></div>
+
+  <main class="page">
+
+    <header class="masthead">
+      <p class="eyebrow">Par Avion &middot; CodeAlpha AI Internship &middot; Task 01</p>
+      <h1 class="headline">Language&nbsp;Translation&nbsp;Tool</h1>
+      <p class="subhead">Write a line, send it across the language border, read it back on the other side.</p>
+    </header>
+
+    <section class="postcard" aria-label="Translator">
+
+      <!-- LEFT HALF: message -->
+      <div class="half half-message">
+        <div class="half-head">
+          <label for="source-lang" class="half-label">From</label>
+          <select id="source-lang" class="lang-select">
+            {% for name, code in languages.items() %}
+              <option value="{{ code }}" {% if name == "Auto Detect" %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <textarea id="input-text" class="text-area" placeholder="Type or paste your message here…" maxlength="5000"></textarea>
+        <div class="half-foot">
+          <span id="char-count" class="char-count">0 / 5000</span>
+          <button id="clear-btn" class="text-btn" type="button">Clear</button>
+        </div>
+      </div>
+
+      <!-- PERFORATION -->
+      <div class="perforation" aria-hidden="true">
+        <button id="swap-btn" class="swap-btn" type="button" title="Swap languages" aria-label="Swap languages">⇄</button>
+      </div>
+
+      <!-- RIGHT HALF: translation -->
+      <div class="half half-translation">
+        <div class="half-head">
+          <label for="target-lang" class="half-label">To</label>
+          <select id="target-lang" class="lang-select">
+            {% for name, code in languages.items() %}
+              {% if name != "Auto Detect" %}
+                <option value="{{ code }}" {% if name == "English" %}selected{% endif %}>{{ name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div id="output-text" class="text-area output" data-placeholder="Your translation will arrive here…"></div>
+        <div class="half-foot">
+          <span id="status-msg" class="status-msg" role="status" aria-live="polite"></span>
+          <div class="foot-actions">
+            <button id="speak-btn" class="text-btn" type="button" title="Listen">🔊 Listen</button>
+            <button id="copy-btn" class="text-btn" type="button" title="Copy">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- POSTMARK / CTA -->
+      <button id="translate-btn" class="postmark" type="button">
+        <span class="postmark-ring"></span>
+        <span class="postmark-text">Translate</span>
+      </button>
+
+    </section>
+
+    <footer class="colophon">
+      <p>Built with Flask &amp; deep-translator (Google Translate) &middot; CodeAlpha Artificial Intelligence Internship</p>
+    </footer>
+
+  </main>
+
+  <div class="stripe-bar" aria-hidden="true"></div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

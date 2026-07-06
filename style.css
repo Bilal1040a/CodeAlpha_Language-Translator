@@ -1,0 +1,424 @@
+/* ==========================================================================
+   CodeAlpha Language Translation Tool — "Par Avion" design system
+   ==========================================================================
+   Concept: an airmail postcard split in two — your message on the left,
+   its translation on the right — with a perforated centre seam and a
+   postmark-style stamp acting as the send/translate action.
+   ========================================================================== */
+
+:root {
+  /* --- Color tokens --- */
+  --paper:        #F4F6F9;   /* pale airmail-sky paper background */
+  --card:         #FFFFFF;   /* postcard surface */
+  --ink-navy:     #1B3A6B;   /* primary ink / accent */
+  --ink-navy-dark:#122A50;
+  --vermilion:    #C1432E;   /* airmail stripe red, used sparingly */
+  --mustard:      #C98A2C;   /* postmark stamp accent */
+  --charcoal:     #23262B;   /* body text */
+  --slate:        #5B6472;   /* secondary text */
+  --line-soft:    #CDD6E0;   /* hairlines, perforation */
+  --line-softer:  #E4E9EF;
+  --success:      #2E7D5B;
+  --error:        #B3261E;
+
+  /* --- Type tokens --- */
+  --font-display: 'Archivo Black', 'Arial Black', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  /* For text areas we need reliable rendering of Arabic/Urdu/CJK/etc,
+     so we layer system-native scripts after Inter rather than relying
+     on the Latin-only webfont for glyph coverage. */
+  --font-content: 'Inter', 'Noto Nastaliq Urdu', 'Noto Sans Arabic',
+                  'Noto Sans', 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--charcoal);
+  font-family: var(--font-body);
+}
+
+/* --------------------------------------------------------------------
+   Signature motif: thin airmail stripe bars top & bottom of the page
+   -------------------------------------------------------------------- */
+.stripe-bar {
+  height: 8px;
+  width: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ink-navy) 0px, var(--ink-navy) 14px,
+    var(--card) 14px, var(--card) 18px,
+    var(--vermilion) 18px, var(--vermilion) 32px,
+    var(--card) 32px, var(--card) 36px
+  );
+}
+
+.page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 56px 24px 40px;
+}
+
+/* --------------------------------------------------------------------
+   Masthead
+   -------------------------------------------------------------------- */
+.masthead {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vermilion);
+  margin: 0 0 14px;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--ink-navy-dark);
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.subhead {
+  font-size: 16px;
+  color: var(--slate);
+  max-width: 540px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------
+   Postcard
+   -------------------------------------------------------------------- */
+.postcard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(27, 58, 107, 0.04), 0 18px 40px -20px rgba(27, 58, 107, 0.25);
+  overflow: visible;
+}
+
+.postcard::before {
+  /* top trim echoing the airmail stripe, only on the card */
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  border-radius: 8px 8px 0 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ink-navy) 0 8px,
+    var(--card) 8px 10px,
+    var(--vermilion) 10px 18px,
+    var(--card) 18px 20px
+  );
+}
+
+.half {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 26px 22px;
+  min-width: 0;
+}
+
+.half-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.half-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-navy);
+}
+
+.lang-select {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--charcoal);
+  background: var(--paper);
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  padding: 7px 10px;
+  cursor: pointer;
+  max-width: 190px;
+}
+
+.lang-select:focus-visible,
+.text-btn:focus-visible,
+.swap-btn:focus-visible,
+.postmark:focus-visible {
+  outline: 2px solid var(--ink-navy);
+  outline-offset: 2px;
+}
+
+.text-area {
+  flex: 1;
+  min-height: 200px;
+  resize: vertical;
+  border: none;
+  background: transparent;
+  font-family: var(--font-content);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--charcoal);
+  padding: 4px 0;
+}
+
+textarea.text-area:focus {
+  outline: none;
+}
+
+.text-area.output {
+  white-space: pre-wrap;
+  overflow-y: auto;
+  color: var(--ink-navy-dark);
+}
+
+.text-area.output:empty::before {
+  content: attr(data-placeholder);
+  color: var(--slate);
+  opacity: 0.7;
+}
+
+.half-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  min-height: 26px;
+}
+
+.char-count {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--slate);
+}
+
+.status-msg {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--slate);
+}
+
+.status-msg.is-error { color: var(--error); }
+.status-msg.is-success { color: var(--success); }
+
+.foot-actions { display: flex; gap: 8px; }
+
+.text-btn {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-navy);
+  background: transparent;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  padding: 6px 11px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.text-btn:hover {
+  background: var(--paper);
+  border-color: var(--ink-navy);
+}
+
+.text-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------
+   Perforation seam + swap button
+   -------------------------------------------------------------------- */
+.perforation {
+  position: relative;
+  width: 1px;
+  background-image: linear-gradient(var(--line-soft) 60%, transparent 0%);
+  background-size: 2px 14px;
+  background-repeat: repeat-y;
+  background-position: center;
+  margin: 20px 0;
+}
+
+.swap-btn {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line-soft);
+  background: var(--card);
+  color: var(--ink-navy);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, border-color 0.15s ease;
+}
+
+.swap-btn:hover {
+  border-color: var(--ink-navy);
+  transform: translateX(-50%) rotate(180deg);
+}
+
+/* --------------------------------------------------------------------
+   Postmark CTA — straddles the seam at the bottom of the card
+   -------------------------------------------------------------------- */
+.postmark {
+  position: absolute;
+  left: 50%;
+  bottom: -26px;
+  transform: translateX(-50%);
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: none;
+  background: var(--card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 22px -8px rgba(27, 58, 107, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.postmark-ring {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 2px dashed var(--mustard);
+}
+
+.postmark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--ink-navy);
+}
+
+.postmark-text {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-navy);
+}
+
+.postmark:hover {
+  transform: translateX(-50%) scale(1.04);
+  box-shadow: 0 14px 26px -8px rgba(27, 58, 107, 0.55);
+}
+
+.postmark:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+.postmark.is-loading .postmark-text { opacity: 0; }
+
+.postmark.is-loading::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2.5px solid var(--line-soft);
+  border-top-color: var(--ink-navy);
+  animation: spin 0.7s linear infinite;
+  z-index: 2;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.postmark:disabled { cursor: not-allowed; }
+
+/* --------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------- */
+.colophon {
+  text-align: center;
+  margin-top: 56px;
+}
+
+.colophon p {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--slate);
+  letter-spacing: 0.02em;
+}
+
+/* --------------------------------------------------------------------
+   Responsive: stack the postcard halves on narrow screens
+   -------------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .postcard {
+    grid-template-columns: 1fr;
+  }
+
+  .perforation {
+    width: auto;
+    height: 1px;
+    margin: 0 22px;
+    background-image: linear-gradient(90deg, var(--line-soft) 60%, transparent 0%);
+    background-size: 14px 2px;
+    background-position: center;
+  }
+
+  .swap-btn {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .swap-btn:hover {
+    transform: translate(-50%, -50%) rotate(180deg);
+  }
+
+  .postmark {
+    bottom: -26px;
+  }
+
+  .half { padding: 22px 20px 18px; }
+
+  .text-area { min-height: 150px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swap-btn, .postmark, .postmark.is-loading::before {
+    transition: none;
+    animation: none;
+  }
+}
