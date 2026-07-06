@@ -83,10 +83,6 @@ CodeAlpha_LanguageTranslator/
 { "error": "Please enter some text to translate." }
 ```
 
-## 🎥 Demo
-_Add your LinkedIn video walkthrough link here once recorded, as required by
-the internship submission guidelines._
-
 ## 🙌 Acknowledgment
 Built as part of the **Artificial Intelligence Internship** at
 [CodeAlpha](https://www.codealpha.tech).
